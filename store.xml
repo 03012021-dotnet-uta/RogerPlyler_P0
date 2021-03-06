@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ArrayOfChicagoStore xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <ChicagoStore>
+    <Name>Chicago Store - TEXAS</Name>
+  </ChicagoStore>
+  <ChicagoStore>
+    <Name>Chicago Store - COLORADO</Name>
+  </ChicagoStore>
+  <ChicagoStore>
+    <Name>Chicago Store - FLORIDA</Name>
+  </ChicagoStore>
+  <ChicagoStore>
+    <Name>Chicago Store - NORTH CAROLINA</Name>
+  </ChicagoStore>
+</ArrayOfChicagoStore>
