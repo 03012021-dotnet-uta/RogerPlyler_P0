@@ -1,8 +1,12 @@
+using System;
 using System.Collections.Generic;
+using System.Xml.Serialization;
 using PizzaBox.Domain.Models;
 
 namespace PizzaBox.Domain.Abstracts
-{
+{  
+    [XmlInclude(typeof(ChicagoStore))]
+    [XmlInclude(typeof(FreddyPizza))]
     public abstract class AStore
     {
         //Typing 'prop' then hitting tab will complete the line below us.
@@ -11,6 +15,10 @@ namespace PizzaBox.Domain.Abstracts
         {
              return Name;
         }
+        // protected AStore()
+        // {
+        //     //Created as protected so that it won't be instanciated. 
+        // }
        // public List<Order> Orders { get; set; }
        /* public string Name { 
             get{
