@@ -21,11 +21,8 @@ namespace PizzaBox.Domain.Singletons
       {
         if (_storeSingleton == null)
         {
-          
           _storeSingleton = new StoreSingleton(); // printer
-          
         }
-
         return _storeSingleton;
       }
     }
@@ -56,7 +53,7 @@ namespace PizzaBox.Domain.Singletons
     }
 
 
-/*    public static StoreSingleton GetInstance()
+    /*public static StoreSingleton GetInstance()
     {
       if(storeSingleton == null)
       {

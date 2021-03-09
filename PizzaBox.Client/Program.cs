@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using PizzaBox.Domain.Abstracts;
 using PizzaBox.Domain.Models;
 using PizzaBox.Domain.Singletons;
@@ -25,7 +26,7 @@ namespace PizzaBox.Client
           //Select Store
           selectedStore = SelectStoreMenu("What store do you wish to order from"); //WHYYYYYYYYYY
           //Select Pizzas
-
+          var boughtPizzas = PizzaMenu();
           //View Order Total
           Console.WriteLine("You have selected " + selectedStore);
           break;
@@ -58,6 +59,15 @@ namespace PizzaBox.Client
         Console.WriteLine(message);
         DisplayStores();
         return new ChicagoStore();
+    }
+    
+    public static List<APizza> PizzaMenu(){
+
+      var pizzas = new List<APizza>();
+      Console.WriteLine("What Pizza Do you want");
+      
+
+      return pizzas;
     }
   }
 }
