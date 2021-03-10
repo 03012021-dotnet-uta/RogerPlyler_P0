@@ -11,9 +11,13 @@ namespace PizzaBox.Client
   /// </summary>
   class Program
   {
+    static int maxToppings = 3;
+    static double maxCost = 250.0;
 
     static void Main(string[] args)
     {
+      
+      DisplayToppings();
       var input =  StartMenu();
       switch (input){
         case 1:
@@ -32,14 +36,6 @@ namespace PizzaBox.Client
           break;
       }
       
-    }
-
-    public static void DisplayStores()
-    {
-      foreach (var store in StoreSingleton.Instance.Stores)
-      {
-        Console.WriteLine(store);
-      }
     }
 
     public static int StartMenu()
@@ -65,9 +61,33 @@ namespace PizzaBox.Client
 
       var pizzas = new List<APizza>();
       Console.WriteLine("What Pizza Do you want");
-      
-
       return pizzas;
+    }
+
+
+    public static void DisplayStores()
+    {
+      foreach (var store in StoreSingleton.Instance.Stores)
+      {
+        Console.WriteLine(store);
+      }
+    }
+    public static void DisplayToppings()
+    {
+      foreach (var topping in ToppingSingleton.Instance.Toppings)
+      {
+        Console.WriteLine(topping);
+      }
+    }
+
+    public static List<Topping> SelectToppings(APizza selectedPizza)
+    {
+      int input = -1;
+      while(selectedPizza.Toppings.Count < maxToppings || input != 0){
+        Console.WriteLine("What Topping do you want");
+        DisplayToppings();
+      }
+      return null;
     }
   }
 }
