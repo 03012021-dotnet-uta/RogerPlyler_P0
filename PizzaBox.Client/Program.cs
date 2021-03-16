@@ -1,93 +1,470 @@
 ﻿using System;
 using System.Collections.Generic;
-using PizzaBox.Domain.Abstracts;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using PizzaBox.Domain.Models;
-using PizzaBox.Domain.Singletons;
 
 namespace PizzaBox.Client
 {
-  /// <summary>
-  /// 
-  /// </summary>
-  class Program
-  {
-    static int maxToppings = 3;
-    static double maxCost = 250.0;
-
-    static void Main(string[] args)
+    class Program
     {
-      
-      DisplayToppings();
-      var input =  StartMenu();
-      switch (input){
-        case 1:
-          //Select Store
-          var selectedStore = SelectStoreMenu("What store's orders do you want to look at");
-          //View Orders
-          
-          break;
-        case 2:
-          //Select Store
-          selectedStore = SelectStoreMenu("What store do you wish to order from"); //WHYYYYYYYYYY
-          //Select Pizzas
-          var boughtPizzas = PizzaMenu();
-          //View Order Total
-          Console.WriteLine("You have selected " + selectedStore);
-          break;
-      }
-      
-    }
+        static int hourLimit = 2;
+        static int hourStoreLimit = 24;
+        static int maxPizzaCount = 50;
+        static decimal maxPizzaOrder = 250m;
+        
+        static void Main(string[] args)
+        {
+            
+            checkDatabase();
+            
+            Console.WriteLine("Press 1 for Customer\nPress 2 for Store Menu\nPress 0 to exit");
+            int.TryParse(Console.ReadLine(),out var option);
+            switch(option){
+                case 1:
+                    var selectedCust = SelectCustomer();
+                    
+                    Console.WriteLine($"What do you want to do {selectedCust.CustomerName}\n1Place A New Order\n2View Past Orders");
+                    int.TryParse(Console.ReadLine(),out var custoption);
+                    switch(custoption){
+                        case 1:
+                            if(checkCustomerTime(selectedCust,hourLimit))
+                            {
+                                break;
+                            }
+                            var orderStore = SelectStores();
+                            if(checkCustomerStore(selectedCust,orderStore,hourStoreLimit)){
+                                break;
+                            }
+                            CreateOrder(orderStore,selectedCust);                            break;
+                        case 2:
+                            ViewOrders(selectedCust);
+                            break;
+                        default :
+                            Console.WriteLine("Pick valid option");
+                            break;
+                    }
+                break;
 
-    public static int StartMenu()
-    {
-      string customerInput;
-      int customerEntered;
-      Console.WriteLine("Pizza Town is the best way to order Pizza");
-      do{
-      Console.WriteLine("1 Employee Login\n2 Customer Login");
-        customerInput = Console.ReadLine();
-      } while(!int.TryParse(customerInput,out customerEntered));
-      return customerEntered;
-      
-    }
-    public static AStore SelectStoreMenu(string message)
-    {
-        Console.WriteLine(message);
-        DisplayStores();
-        return new ChicagoStore();
-    }
-    
-    public static List<APizza> PizzaMenu(){
-
-      var pizzas = new List<APizza>();
-      Console.WriteLine("What Pizza Do you want");
-      return pizzas;
-    }
+                case 2:
+                    var selectedStore = SelectStores();
+                    ViewOrders(selectedStore);
+                break;
+                
+                default:
+                    Console.WriteLine("Please pic a valid option");
+                break;
+            }
+            
 
 
-    public static void DisplayStores()
-    {
-      foreach (var store in StoreSingleton.Instance.Stores)
-      {
-        Console.WriteLine(store);
-      }
-    }
-    public static void DisplayToppings()
-    {
-      foreach (var topping in ToppingSingleton.Instance.Toppings)
-      {
-        Console.WriteLine(topping);
-      }
-    }
 
-    public static List<Topping> SelectToppings(APizza selectedPizza)
-    {
-      int input = -1;
-      while(selectedPizza.Toppings.Count < maxToppings || input != 0){
-        Console.WriteLine("What Topping do you want");
-        DisplayToppings();
-      }
-      return null;
+        }
+
+        static bool checkCustomerTime(Acustomer checkCust,int customerHourLimit)
+        {
+            var context = new PizzaBoxContext();
+            var query = context.Aorders.Where(c => c.CustomerId == checkCust.Id);
+            if(query.Any(t => t.TimeOrdered >= DateTime.Now.AddHours(-customerHourLimit)))
+            {
+                Console.WriteLine("You have ordered in the last " + customerHourLimit+ " hours");
+                return true;
+            }else{
+                 Console.WriteLine("Welcome " + checkCust.CustomerName);
+                 return false;
+            }
+        }
+
+        static bool checkCustomerStore(Acustomer checkCust,Astore checkStore,int storeLimit)
+        {
+            var context = new PizzaBoxContext();
+            var query = context.Aorders.Where(c => c.CustomerId == checkCust.Id);
+            var queriable = query.Where(d => d.StoreId == checkStore.Id);
+            if(queriable.Any(t => t.TimeOrdered >= DateTime.Now.AddHours(-storeLimit)))
+            {
+                Console.WriteLine("You have ordered in the last "+storeLimit + " hours");
+                return true;
+            }else{
+                 
+                 return false;
+            }
+        }
+
+        static Astore SelectStores(){
+            var context = new PizzaBoxContext();
+            List<Astore> stores = context.Astores.ToList();
+            foreach (var s in stores){
+                Console.WriteLine(s);
+            }
+            int input = -1;
+            
+            do{ 
+                int.TryParse(Console.ReadLine(),out input);
+                
+            }while(!context.Astores.Any(p => p.Id == input));
+            Astore store = context.Astores.Where(p => p.Id == input).First();
+            Console.WriteLine(store.StoreName + " Selected");
+            return store;
+        }
+        static Apizza SelectPizza(){
+            DisplayPizzas();
+            var context = new PizzaBoxContext();
+            int input = -1;
+            do{ 
+                int.TryParse(Console.ReadLine(),out input);
+            }while(!context.Apizzas.Any(p => p.Id == input));
+            Apizza pizza = context.Apizzas.Where(p => p.Id == input).First();
+            Console.Write(pizza.PizzaName + " Selected");
+            pizza.Gettops();
+            return pizza;
+        }
+
+        static void DisplayPizzas(){
+            var context = new PizzaBoxContext();
+
+            List<Apizza> pizzas = context.Apizzas.ToList();
+            foreach (var p in pizzas){
+                Console.WriteLine($"{p.Id} {p.PizzaName}.");
+            }
+        }
+
+        static Acustomer SelectCustomer(){
+            var context = new PizzaBoxContext();
+            Console.WriteLine("What is your name");
+            var name = Console.ReadLine();
+            if(context.Acustomers.Any(c => c.CustomerName == name)){
+               return context.Acustomers.Where(c => c.CustomerName == name).First();
+            }else{
+                var cust = new Acustomer(){
+                    Id = context.Acustomers.Max(c => c.Id) + 1,
+                    CustomerName = name
+                };
+                context.Acustomers.Add(cust);
+                context.SaveChanges();
+                return cust;
+            }
+        }
+
+        static void CreateOrder(Astore orderingStore, Acustomer orderingCustomer){
+            var context = new PizzaBoxContext();
+            int input = -1; 
+            List<Apizza> pizzas = new List<Apizza>();
+            var newOrder = new Aorder(){
+                OrderId= (context.Aorders.Any(o => o.OrderId == 1))?context.Aorders.Max(o => o.OrderId) +1: 1,
+                CustomerId = orderingCustomer.Id,
+                StoreId = orderingStore.Id,
+                TimeOrdered = DateTime.Now
+            };
+            Console.WriteLine("What Pizza Do you want in your order");
+            do{
+                if(input != 2 ){
+                pizzas.Add(SelectPizza());
+                ModifyPizza(pizzas[pizzas.Count - 1 ]);
+                }else{
+                    RemovePizza(pizzas);
+                }
+
+                if(pizzas.Count > 50 || newOrder.TotalPrice(pizzas) > 250m )
+                {
+                    input = 0;
+                    Console.WriteLine("You have reached the limit of your order");
+                }else{
+                    Console.WriteLine("Do you want another pizza. 0 for no 1 for yes 2 to remove pizza");
+                    int.TryParse(Console.ReadLine(),out input);
+                }
+            }while(!(input == 0));
+
+            foreach(var p in pizzas){
+                Console.WriteLine(p.ToString());
+            }
+            var totalPrice = 0m;
+            foreach(var p in pizzas){
+                totalPrice += p.GetPizzaPrice();
+            }
+
+
+            SubmitOrder(newOrder,pizzas);
+        }
+
+        static void ModifyPizza(Apizza PizzaToModify){
+            PizzaToModify.Size = SelectSize().Id;
+            PizzaToModify.Crust = SelectCrust().Id;
+            SelectToppings(PizzaToModify);
+            Console.WriteLine(PizzaToModify.ToString());
+        }
+
+        static Acrust SelectCrust(){
+            var context = new PizzaBoxContext();
+            Console.Write("What Crust would you like");
+            List<Acrust> crust = context.Acrusts.ToList();
+            foreach (var c in crust){
+                Console.WriteLine($"{c.Id} {c.CrustName}.");
+            }
+            int input = -1;
+            do{ 
+                int.TryParse(Console.ReadLine(),out input);
+            }while(!context.Acrusts.Any(p => p.Id == input));
+            Acrust crus = context.Acrusts.Where(p => p.Id == input).First();
+            return crus;
+        }
+
+        static void SelectToppings(Apizza PizzaToModify)
+        {
+            var context = new PizzaBoxContext();
+            Console.Write("What Toppings would you like to add");
+            List<Atopping> top = context.Atoppings.ToList();
+            foreach (var t in top){
+                Console.WriteLine($"{t.Id} {t.ToppingName} ${t.ToppingPrice}");
+            }
+            var input = 0;
+            do{
+                Console.WriteLine("Which Topping would you like to add\n enter 0 to leave");
+                int.TryParse(Console.ReadLine(),out input);
+                int newTop = 0;
+                if(context.Atoppings.Any(p => p.Id == input))
+                {
+                    newTop = context.Atoppings.Where(p => p.Id == input).First().Id;
+                }
+                
+                if(input !=0){
+                Console.WriteLine("Which Topping do you wanna change");
+                int.TryParse(Console.ReadLine(),out int changeTop);
+                switch(changeTop){
+                    case 1:
+                        PizzaToModify.Topping1 = newTop;
+                    break;
+                    case 2:
+                        PizzaToModify.Topping2 = newTop;
+                    break;
+                    case 3:
+                        PizzaToModify.Topping3 = newTop;
+                    break;
+                    case 4:
+                        PizzaToModify.Topping4 = newTop;
+                    break;
+                    case 5:
+                        PizzaToModify.Topping5 = newTop;
+                    break;
+                    default:
+                        Console.WriteLine("Pick a valid option next time!");
+                    break;
+
+                }
+                }
+            }while(input != 0);
+            
+        }
+
+            static Asize SelectSize(){
+            var context = new PizzaBoxContext();
+            Console.Write("What Size would you like");
+            List<Asize> sizes = context.Asizes.ToList();
+            foreach (var s in sizes){
+                Console.WriteLine($"{s.Id} {s.SizeName}.");
+            }
+            int input = -1;
+            do{ 
+                int.TryParse(Console.ReadLine(),out input);
+            }while(!context.Asizes.Any(p => p.Id == input));
+            Asize siz = context.Asizes.Where(p => p.Id == input).First();
+            return siz;
+        }
+
+        static void SubmitOrder(Aorder submittedOrder,List<Apizza> submittedPizzas){
+            var context = new PizzaBoxContext();
+            Console.WriteLine("Order #" + submittedOrder.OrderId);
+            context.Aorders.Add(submittedOrder);
+            context.SaveChanges();
+            foreach(var p in submittedPizzas){
+                var orderedPizzas = new AorderedPizza(){
+                    Id = (context.AorderedPizzas.Any(o => o.Id == 1))?context.AorderedPizzas.Max(o => o.Id) +1: 1,
+                    OrderId = submittedOrder.OrderId,
+                    PizzaName = p.PizzaName,
+                    Topping1 = p.Topping1,
+                    Topping2 = p.Topping2,
+                    Topping3 = p.Topping3,
+                    Topping4 = p.Topping4,
+                    Topping5 = p.Topping5,
+                    Size = p.Size,
+                    Crust = p.Crust,
+                    Price = p.GetPizzaPrice()
+                };
+                Console.WriteLine(orderedPizzas.OrderId);
+                context.AorderedPizzas.Add(orderedPizzas);
+                context.SaveChanges();
+            }
+        }
+
+        static void ViewOrders(Acustomer cust){
+            var context = new PizzaBoxContext();
+            List<Aorder> ord = context.Aorders.Where(o => o.CustomerId == cust.Id).ToList();
+            foreach(var o in ord){
+               Console.WriteLine("  Order # " +o.OrderId + " " + o.TimeOrdered);
+               List<AorderedPizza> piz = context.AorderedPizzas.Where(pi => pi.OrderId == o.OrderId).ToList();
+               foreach(var p in piz)
+               {
+                   Console.WriteLine(p.PizzaName);
+               }
+            }
+        }
+
+        static void ViewOrders(Astore stor)
+        {
+            Console.WriteLine("How many days back do you want to veiw orders :");
+            int.TryParse(Console.ReadLine(),out int input);
+            var context = new PizzaBoxContext();
+            var queriable = context.Aorders.Where(o => o.StoreId == stor.Id).ToList();
+            var ord = queriable.Where(o=> o.TimeOrdered >= DateTime.Now.AddDays(-input));
+            foreach(var o in ord){
+               Console.WriteLine(" Order # " +o.OrderId + " " + o.TimeOrdered);
+               List<AorderedPizza> piz = context.AorderedPizzas.Where(pi => pi.OrderId == o.OrderId).ToList();
+               foreach(var p in piz)
+               {
+                   Console.WriteLine("    " + p.PizzaName);
+               }
+            }
+           
+        }
+        
+        static void RemovePizza(List<Apizza> pizzas){
+            Console.WriteLine("Which pizza do you wish to remove\nEnter 0 if you don't wish to remove any");
+            for (int i = 0; i < pizzas.Count; i++){
+                Console.WriteLine(i + 1 +" " + pizzas[i]);
+            }
+            int.TryParse(Console.ReadLine(),out var input);
+            if(input >0 && input <= pizzas.Count){
+            pizzas.Remove(pizzas[input-1]);
+            }else{
+                Console.WriteLine("No pizzas were removed");
+            }
+        }
+
+        static void checkDatabase(){
+            Console.WriteLine("Checking Database...");
+            var context = new PizzaBoxContext();
+            if(!context.Astores.Any())
+            {
+                var top = new Astore(){
+                    Id = 1,
+                    StoreName = "Freddys Pizza"
+                };
+                context.Astores.Add(top);
+                context.SaveChanges();
+                 top = new Astore(){
+                    Id = 1,
+                    StoreName = "Chicago Pizza"
+                };
+                context.Astores.Add(top);
+                context.SaveChanges();
+            }
+            if(!context.Atoppings.Any())
+            {
+                var top = new Atopping(){
+                    ToppingName = "Cheese",
+                    ToppingPrice = 0m,
+                    Id = 1
+                };
+                context.Atoppings.Add(top);
+                context.SaveChanges();
+                top = new Atopping(){
+                    ToppingName = "Peporoni",
+                    ToppingPrice = 0.5m,
+                    Id = 2
+                };
+                context.Atoppings.Add(top);
+                context.SaveChanges();
+            }
+            if(!context.Acrusts.Any())
+            {
+                var top = new Acrust(){
+                    CrustName = "Thin",
+                    CrustPrice = 0m,
+                    Id = 1
+                };
+                context.Acrusts.Add(top);
+                context.SaveChanges();
+                top = new Acrust(){
+                    CrustName = "Regular",
+                    CrustPrice = 0m,
+                    Id = 2
+                };
+                context.Acrusts.Add(top);
+                context.SaveChanges();
+                top = new Acrust(){
+                    CrustName = "Deep Dish",
+                    CrustPrice = 1m,
+                    Id = 3
+                };
+                context.Acrusts.Add(top);
+                context.SaveChanges();
+                top = new Acrust(){
+                    CrustName = "Stuff Crust",
+                    CrustPrice = 2m,
+                    Id = 4
+                };
+                context.Acrusts.Add(top);
+                context.SaveChanges();
+                
+            }
+            if(!context.Asizes.Any())
+            {
+                var top = new Asize(){
+                    SizeName = "Small",
+                    SizePrice = 0m,
+                    Id = 1
+                };
+                context.Asizes.Add(top);
+                context.SaveChanges();
+                top = new Asize(){
+                    SizeName = "Medium",
+                    SizePrice = 1m,
+                    Id = 2
+                };
+                context.Asizes.Add(top);
+                context.SaveChanges();
+                top = new Asize(){
+                    SizeName = "Large",
+                    SizePrice = 2m,
+                    Id = 3
+                };
+                context.Asizes.Add(top);
+                context.SaveChanges();
+            }
+            if(!context.Apizzas.Any())
+            {
+                var top = new Apizza(){
+                    Id = 1,
+                    PizzaName = "Cheese Pizza",
+                    Topping1 = 1,
+                    Topping2 = 1,
+                    Size = 1,
+                    Crust = 1,
+                    Price = 10.0m
+                };
+                context.Apizzas.Add(top);
+                context.SaveChanges();
+                top = new Apizza(){
+                    Id = 2,
+                    PizzaName = "Peporoni",
+                    Topping1 = 1,
+                    Topping2 = 2,
+                    Size = 1,
+                    Crust = 1,
+                    Price = 12.0m
+                };
+                context.Apizzas.Add(top);
+                context.SaveChanges();
+
+            }
+            
+        }
+
     }
-  }
 }
+/*
+TO DO
+    *Make it so every topping can be edited *done*
+    *Remove Pizza From Order *done*
+    *Select Times For Viewing Orders *Done*
+    *Fix 24 Hour and 2 Hour Restriction *Done*
+*/
