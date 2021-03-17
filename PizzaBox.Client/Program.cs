@@ -166,8 +166,9 @@ namespace PizzaBox.Client
                 }else{
                     RemovePizza(pizzas);
                 }
+                Console.WriteLine("Order Total $: " + newOrder.TotalPrice(pizzas).Value);
 
-                if(pizzas.Count > maxPizzaCount || newOrder.TotalPrice(pizzas) >  maxPizzaOrder)
+                if(pizzas.Count >= maxPizzaCount || newOrder.TotalPrice(pizzas) >  maxPizzaOrder)
                 {
                     input = 0;
                     Console.WriteLine("You have reached the limit of your order");
