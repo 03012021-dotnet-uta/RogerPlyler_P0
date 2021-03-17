@@ -30,6 +30,7 @@ namespace PizzaBox.Domain.Models
 
         public override string ToString()
         {
+            var context = new PizzaBoxContext();
             string toReturn = "";
 
             toReturn = Id + " " + PizzaName + " Toppings:";
@@ -37,8 +38,8 @@ namespace PizzaBox.Domain.Models
             {
                 toReturn +=" " + t.ToppingName;
             }
-            toReturn += " Crust " + Crust;
-            toReturn += " Size " + Size;
+            toReturn += " Crust " + context.Acrusts.Where(c => c.Id == Crust).FirstOrDefault().CrustName;
+            toReturn += " Size " + context.Asizes.Where(c => c.Id == Size).FirstOrDefault().SizeName;
             toReturn += " Price :" + GetPizzaPrice();
             return toReturn;
        }  
@@ -63,10 +64,13 @@ namespace PizzaBox.Domain.Models
 
        public decimal GetPizzaPrice()
        {
+           var context = new PizzaBoxContext();
            decimal returnPrice = Price.Value;
            foreach(var t in Gettops()){
                returnPrice += t.ToppingPrice.Value;
            }
+           returnPrice += context.Acrusts.Where(c => c.Id == Crust).FirstOrDefault().CrustPrice.Value;
+           returnPrice += context.Asizes.Where(c => c.Id == Size).FirstOrDefault().SizePrice.Value;
         return returnPrice;
        }
     }

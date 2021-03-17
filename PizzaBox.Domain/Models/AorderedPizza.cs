@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 #nullable disable
 
 namespace PizzaBox.Domain.Models
 {
-    public partial class AorderedPizza
+         public partial class AorderedPizza
     {
         public int Id { get; set; }
         public int OrderId { get; set; }
@@ -29,8 +30,9 @@ namespace PizzaBox.Domain.Models
         public virtual Atopping Topping4Navigation { get; set; }
         public virtual Atopping Topping5Navigation { get; set; }
 
-         public override string ToString()
+        public override string ToString()
         {
+            var context = new PizzaBoxContext();
             string toReturn = "";
 
             toReturn = Id + " " + PizzaName + " Toppings:";
@@ -38,9 +40,9 @@ namespace PizzaBox.Domain.Models
             {
                 toReturn +=" " + t.ToppingName;
             }
-            toReturn += " Crust " + Crust;
-            toReturn += " Size " + Size;
-            toReturn += " Price :" + Price;
+            toReturn += " Crust : " + context.Acrusts.Where(c => c.Id == Crust).FirstOrDefault().CrustName;
+            toReturn += " Size : " + context.Asizes.Where(c => c.Id == Size).FirstOrDefault().SizeName;
+            toReturn += " Price : " + Price;
             return toReturn;
        }  
 
