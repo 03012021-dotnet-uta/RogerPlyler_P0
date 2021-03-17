@@ -75,6 +75,7 @@ namespace PizzaBox.Client
             }
         }
 
+        //Checks to see if the customer has used this store within a time frame
         static bool checkCustomerStore(Acustomer checkCust,Astore checkStore,int storeLimit)
         {
             var context = new PizzaBoxContext();
@@ -90,6 +91,7 @@ namespace PizzaBox.Client
             }
         }
 
+        //Displays stores and allows you to pick one
         static Astore SelectStores(){
             var context = new PizzaBoxContext();
             List<Astore> stores = context.Astores.ToList();
@@ -197,7 +199,7 @@ namespace PizzaBox.Client
         //Allows the user to have a new crust
         static Acrust SelectCrust(){
             var context = new PizzaBoxContext();
-            Console.Write("What Crust would you like");
+            Console.WriteLine("What Crust would you like");
             List<Acrust> crust = context.Acrusts.ToList();
             foreach (var c in crust){
                 Console.WriteLine($"{c.Id} {c.CrustName}  $ {c.CrustPrice}");
@@ -214,7 +216,7 @@ namespace PizzaBox.Client
         static void SelectToppings(Apizza PizzaToModify)
         {
             var context = new PizzaBoxContext();
-            Console.Write("What Toppings would you like to add");
+            Console.WriteLine("What Toppings would you like to add");
             List<Atopping> top = context.Atoppings.ToList();
             foreach (var t in top){
                 Console.WriteLine($"{t.Id} {t.ToppingName} ${t.ToppingPrice}");
@@ -265,7 +267,7 @@ namespace PizzaBox.Client
             Console.WriteLine("What Size would you like");
             List<Asize> sizes = context.Asizes.ToList();
             foreach (var s in sizes){
-                Console.WriteLine($"{s.Id} {s.SizeName}.");
+                Console.WriteLine($"{s.Id} {s.SizeName} ${s.SizePrice}");
             }
             int input = -1;
             do{ 
