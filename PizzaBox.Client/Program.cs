@@ -106,6 +106,7 @@ namespace PizzaBox.Client
             Console.WriteLine(store.StoreName + " Selected");
             return store;
         }
+        //Allows you to select a pizza
         static Apizza SelectPizza(){
             DisplayPizzas();
             var context = new PizzaBoxContext();
@@ -124,7 +125,7 @@ namespace PizzaBox.Client
 
             List<Apizza> pizzas = context.Apizzas.ToList();
             foreach (var p in pizzas){
-                Console.WriteLine($"{p.Id} {p.PizzaName}.");
+                Console.WriteLine(p.ToString());
             }
         }
 
@@ -164,7 +165,7 @@ namespace PizzaBox.Client
                     RemovePizza(pizzas);
                 }
 
-                if(pizzas.Count > 50 || newOrder.TotalPrice(pizzas) > 250m )
+                if(pizzas.Count > maxPizzaCount || newOrder.TotalPrice(pizzas) >  maxPizzaOrder)
                 {
                     input = 0;
                     Console.WriteLine("You have reached the limit of your order");
@@ -193,12 +194,13 @@ namespace PizzaBox.Client
             Console.WriteLine(PizzaToModify.ToString());
         }
 
+        //Allows the user to have a new crust
         static Acrust SelectCrust(){
             var context = new PizzaBoxContext();
             Console.Write("What Crust would you like");
             List<Acrust> crust = context.Acrusts.ToList();
             foreach (var c in crust){
-                Console.WriteLine($"{c.Id} {c.CrustName}.");
+                Console.WriteLine($"{c.Id} {c.CrustName}  $ {c.CrustPrice}");
             }
             int input = -1;
             do{ 
@@ -208,6 +210,7 @@ namespace PizzaBox.Client
             return crus;
         }
 
+        //Takes in an object and allows you to modityf a pizza
         static void SelectToppings(Apizza PizzaToModify)
         {
             var context = new PizzaBoxContext();
@@ -218,9 +221,11 @@ namespace PizzaBox.Client
             }
             var input = 0;
             do{
+                //Takes in user input
                 Console.WriteLine("Which Topping would you like to add\n enter 0 to leave");
                 int.TryParse(Console.ReadLine(),out input);
                 int newTop = 0;
+                //Checks to see if topping exists
                 if(context.Atoppings.Any(p => p.Id == input))
                 {
                     newTop = context.Atoppings.Where(p => p.Id == input).First().Id;
@@ -254,10 +259,10 @@ namespace PizzaBox.Client
             }while(input != 0);
             
         }
-
+            //Allows you to select a new size for the pizza
             static Asize SelectSize(){
             var context = new PizzaBoxContext();
-            Console.Write("What Size would you like");
+            Console.WriteLine("What Size would you like");
             List<Asize> sizes = context.Asizes.ToList();
             foreach (var s in sizes){
                 Console.WriteLine($"{s.Id} {s.SizeName}.");
@@ -270,11 +275,13 @@ namespace PizzaBox.Client
             return siz;
         }
 
+        //Creates info on the submitted order table
         static void SubmitOrder(Aorder submittedOrder,List<Apizza> submittedPizzas){
             var context = new PizzaBoxContext();
-            Console.WriteLine("Order #" + submittedOrder.OrderId);
+            Console.WriteLine("Order #" + submittedOrder.OrderId + " $" + submittedOrder.Total);
             context.Aorders.Add(submittedOrder);
             context.SaveChanges();
+            //Takes each of the orders for the pizza and displays them and the price and moves them to the submitted order pizza
             foreach(var p in submittedPizzas){
                 var orderedPizzas = new AorderedPizza(){
                     Id = (context.AorderedPizzas.Any(o => o.Id == 1))?context.AorderedPizzas.Max(o => o.Id) +1: 1,
@@ -289,25 +296,28 @@ namespace PizzaBox.Client
                     Crust = p.Crust,
                     Price = p.GetPizzaPrice()
                 };
-                Console.WriteLine(orderedPizzas.OrderId);
+                Console.WriteLine("    " + p.ToString());
                 context.AorderedPizzas.Add(orderedPizzas);
                 context.SaveChanges();
             }
         }
 
+        //This will view orders for a customer
         static void ViewOrders(Acustomer cust){
             var context = new PizzaBoxContext();
             List<Aorder> ord = context.Aorders.Where(o => o.CustomerId == cust.Id).ToList();
             foreach(var o in ord){
-               Console.WriteLine("  Order # " +o.OrderId + " " + o.TimeOrdered);
+               Console.WriteLine("Order # " +o.OrderId + " " + o.TimeOrdered + " $" + o.Total);
                List<AorderedPizza> piz = context.AorderedPizzas.Where(pi => pi.OrderId == o.OrderId).ToList();
                foreach(var p in piz)
                {
-                   Console.WriteLine(p.PizzaName);
+                   Console.WriteLine("    " + p.ToString());
                }
             }
         }
 
+        //Overloaded function
+        //This will view the orders of a store based on the input from the user
         static void ViewOrders(Astore stor)
         {
             Console.WriteLine("How many days back do you want to veiw orders :");
@@ -316,21 +326,23 @@ namespace PizzaBox.Client
             var queriable = context.Aorders.Where(o => o.StoreId == stor.Id).ToList();
             var ord = queriable.Where(o=> o.TimeOrdered >= DateTime.Now.AddDays(-input));
             foreach(var o in ord){
-               Console.WriteLine(" Order # " +o.OrderId + " " + o.TimeOrdered);
+               Console.WriteLine("Order # " +o.OrderId + " " + o.TimeOrdered + " $" + o.Total);
                List<AorderedPizza> piz = context.AorderedPizzas.Where(pi => pi.OrderId == o.OrderId).ToList();
                foreach(var p in piz)
                {
-                   Console.WriteLine("    " + p.PizzaName);
+                    Console.WriteLine("    " + p.ToString());
                }
             }
            
         }
         
+        //Removes Pizza From a list
         static void RemovePizza(List<Apizza> pizzas){
             Console.WriteLine("Which pizza do you wish to remove\nEnter 0 if you don't wish to remove any");
             for (int i = 0; i < pizzas.Count; i++){
                 Console.WriteLine(i + 1 +" " + pizzas[i]);
             }
+            //This will parse the input of the person and make it so that it will not cause an out of bounds error
             int.TryParse(Console.ReadLine(),out var input);
             if(input >0 && input <= pizzas.Count){
             pizzas.Remove(pizzas[input-1]);
@@ -339,8 +351,11 @@ namespace PizzaBox.Client
             }
         }
 
+        /*
+            This will check the database for any item that isn't part of anything that generates
+            and will give it default values
+        */
         static void checkDatabase(){
-            Console.WriteLine("Checking Database...");
             var context = new PizzaBoxContext();
             if(!context.Astores.Any())
             {
