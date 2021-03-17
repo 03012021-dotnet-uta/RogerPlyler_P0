@@ -1,4 +1,7 @@
 console.log("WHYYYYY");
+var sweet = 0;
+var salty = 0;
+var sns = 0;
 var output = "";
 for (var a = 0; a < 10; a++) {
     for (var b = 0; b < 10; b++) {
@@ -7,11 +10,14 @@ for (var a = 0; a < 10; a++) {
             var i = a * 100 + b * 10 + c ;
             if(i%3 == 0 && i%5 == 0)
             {
-                output += " Fizzbuzz";
+                output += " Saltyn'Sweet";
+                sns = sns + 1;
             }else if(i % 3 == 0){
-                output += " Fizz";
+                output += " Sweet";
+                sweet = sweet + 1;
             }else if(i % 5 == 0){
-                output += " Buzz";
+                output += " Salty";
+                salty = salty + 1;
             }else{
                 output += " " + i;
             }
@@ -19,4 +25,4 @@ for (var a = 0; a < 10; a++) {
         console.log(output);
     }
 }
-console.log("out of for loops");
+console.log("Salty " + salty + " Sweet " + sweet + " Sweet n Salty " + sns);
