@@ -9,3 +9,6 @@
 }
 form {border-style: dotted;}
 h1 {background-color: darkgray;}
+form :hover{
+    background-color: grey;
+}

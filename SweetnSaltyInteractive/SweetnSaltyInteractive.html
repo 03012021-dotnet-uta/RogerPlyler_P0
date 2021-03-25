@@ -19,6 +19,7 @@
         <button onclick="Start()">Start</button>
     </div>
 <div id = "input">
+    <!---
     <form id = "game" onsubmit ="SNSoutput(this.High.value,this.Low.value,this.PerLine.value) ;return false" >
         <label for="SNSfname">High:</label>
         <input type="text" name="High" id="loginfname" autocomplete="off" placeholder="High">
@@ -28,6 +29,31 @@
         <input type="text" name="PerLine" id="loginlname" autocomplete="off" placeholder="Low">
         <input type="submit"  class="SNSbutton">
     </form>
+    -->
+    <div id = "high">
+        <form onsubmit="HighInput(this.high.value); return false;">
+            <label for="SNSfname">High:</label>
+            <input type="text" name="high" id="loginfname" autocomplete="off" placeholder="High">
+            <input type="submit"  class="SNSbutton">
+        </form>
+    </div>
+
+    <div id = "low">
+        <form  onsubmit="LowInput(this.low.value);return false;">
+            <label for="SNSfname">Low:</label>
+            <input type="text" name="low" id="loginfname" autocomplete="off" placeholder="Low">
+            <input type="submit"  class="SNSbutton">
+        </form>
+    </div>
+
+    <div id = "PL">
+        <form onsubmit="PerLineInput(this.PerLine.value);return false;">
+            <label for="SNSfname">PerLine:</label>
+            <input type="text" name="PerLine" id="loginfname" autocomplete="off" placeholder="Low">
+            <input type="submit"  class="SNSbutton">
+        </form>
+    </div>
+    
     <form id = "reset" onsubmit="ResetGame();return false;">
         <label>Reset Game</label>
         <input type="submit" >
