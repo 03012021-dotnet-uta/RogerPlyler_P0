@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="Stylesheet" href="SweetnSaltyInteractive.css" >
+    <title>Document</title>
+</head>
+<body>
+    <div id = "start">
+        <h1>Salty Sweet</h1>
+        <p>Welcome to salty Sweet. Here you will input three seperate values
+        The Starting value the ending value and how many you want per line.
+        When it is divisible by 3 it will display <b class = "sweet">sweet</b>.
+        When divisible by 5 it will display <b class = "salty">salty</b>.
+        When divisible by both it will display <b class = "salty">salty</b> and <b class = "sweet">sweet</b>.
+        </p>
+        <button onclick="Start()">Start</button>
+    </div>
+<div id = "input">
+    <form id = "game" onsubmit ="SNSoutput(this.High.value,this.Low.value,this.PerLine.value) ;return false" >
+        <label for="SNSfname">High:</label>
+        <input type="text" name="High" id="loginfname" autocomplete="off" placeholder="High">
+        <label for="SNSlname">Low:</label>
+        <input type="text" name="Low" id="loginlname" autocomplete="off" placeholder="Low">
+        <label for="SNSlname">Per Line:</label>
+        <input type="text" name="PerLine" id="loginlname" autocomplete="off" placeholder="Low">
+        <input type="submit"  class="SNSbutton">
+    </form>
+    <form id = "reset" onsubmit="ResetGame();return false;">
+        <label>Reset Game</label>
+        <input type="submit" >
+    </form>
+
+    <b class="error"id = "error">error</b>
+    <div class ="output"></div>
+</div>
+
+
+
+   
+    <script src="SweetnSaltyInteractive.js"></script>
+</body>
+</html>
